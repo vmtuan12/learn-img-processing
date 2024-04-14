@@ -27,7 +27,31 @@ def padding_img(img, filter_size=3):
     Return:
         padded_img: cv2 image: the padding image
     """
-  # Need to implement here
+    # Need to implement here
+    height, width = img.shape[:2]
+    
+    pad_size = filter_size // 2
+    
+    padded_img = np.zeros((height + 2 * pad_size, width + 2 * pad_size), dtype=img.dtype)
+    
+    padded_img[pad_size:pad_size+height, pad_size:pad_size+width] = img
+    
+    for i in range(pad_size):
+        padded_img[i, pad_size:pad_size+width] = img[0, :]
+        padded_img[-i-1, pad_size:pad_size+width] = img[-1, :]
+    
+    for i in range(pad_size):
+        padded_img[pad_size:pad_size+height, i] = padded_img[pad_size:pad_size+height, pad_size]
+        padded_img[pad_size:pad_size+height, -i-1] = padded_img[pad_size:pad_size+height, -pad_size-1]
+    
+    padded_img[:pad_size, :pad_size] = img[0, 0]
+    padded_img[:pad_size, -pad_size:] = img[0, -1]
+    padded_img[-pad_size:, :pad_size] = img[-1, 0]
+    padded_img[-pad_size:, -pad_size:] = img[-1, -1]
+
+    # print(img)
+    # print(padded_img)
+    return padded_img
 
 def mean_filter(img, filter_size=3):
     """
@@ -39,7 +63,19 @@ def mean_filter(img, filter_size=3):
     Return:
         smoothed_img: cv2 image: the smoothed image with mean filter.
     """
-  # Need to implement here
+    # Need to implement here
+    padded_img = padding_img(img=img, filter_size=filter_size)
+    height, width = img.shape[:2]
+    
+    smoothed_img = np.zeros_like(img)
+
+    for i in range(height):
+        for j in range(width):
+            neighborhood = padded_img[i:i+filter_size, j:j+filter_size]
+            mean_value = np.mean(neighborhood)
+            smoothed_img[i, j] = mean_value
+    
+    return smoothed_img
 
 def median_filter(img, filter_size=3):
     """
@@ -51,7 +87,19 @@ def median_filter(img, filter_size=3):
         Return:
             smoothed_img: cv2 image: the smoothed image with median filter.
     """
-  # Need to implement here
+    # Need to implement here
+    padded_img = padding_img(img=img, filter_size=filter_size)
+    height, width = img.shape[:2]
+    
+    smoothed_img = np.zeros_like(img)
+
+    for i in range(height):
+        for j in range(width):
+            neighborhood = padded_img[i:i+filter_size, j:j+filter_size]
+            median_value = np.median(neighborhood)
+            smoothed_img[i, j] = median_value
+    
+    return smoothed_img
 
 
 def psnr(gt_img, smooth_img):
@@ -64,8 +112,14 @@ def psnr(gt_img, smooth_img):
             psnr_score: PSNR score
     """
     # Need to implement here
+    mse = np.mean((gt_img - smooth_img) ** 2)
 
-
+    if(mse == 0):
+        return 100
+    
+    max_pixel = 255.0
+    psnr = 10 * math.log10((max_pixel*max_pixel) / mse)
+    return psnr
 
 def show_res(before_img, after_img):
     """
@@ -88,8 +142,8 @@ def show_res(before_img, after_img):
 
 
 if __name__ == '__main__':
-    img_noise = "" # <- need to specify the path to the noise image
-    img_gt = "" # <- need to specify the path to the gt image
+    img_noise = "ex1_images/noise.png"
+    img_gt = "ex1_images/ori_img.png"
     img = read_img(img_noise)
     filter_size = 3
 
