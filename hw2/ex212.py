@@ -14,6 +14,14 @@ def DFT_slow(data):
     DFT: Nx1: 1D numpy array 
   """
   # You need to implement the DFT here
+  N = len(data)
+  n = np.arange(N)
+  k = n.reshape((N, 1))
+  e = np.exp(-2j * np.pi * k * n / N)
+  
+  X = np.dot(e, data)
+  
+  return X
 
 
 def show_img(origin, row_fft, row_col_fft):
@@ -39,20 +47,22 @@ def show_img(origin, row_fft, row_col_fft):
 
 
 def DFT_2D(gray_img):
-    """
-    Implement the 2D Discrete Fourier Transform
-    Note that: dtype of the output should be complex_
-    params:
-        gray_img: (H, W): 2D numpy array
-        
-    returns:
-        row_fft: (H, W): 2D numpy array that contains the row-wise FFT of the input image
-        row_col_fft: (H, W): 2D numpy array that contains the column-wise FFT of the input image
-    """
-    # You need to implement the DFT here
+  """
+  Implement the 2D Discrete Fourier Transform
+  Note that: dtype of the output should be complex_
+  params:
+      gray_img: (H, W): 2D numpy array
+      
+  returns:
+      row_fft: (H, W): 2D numpy array that contains the row-wise FFT of the input image
+      row_col_fft: (H, W): 2D numpy array that contains the column-wise FFT of the input image
+  """
+  # You need to implement the DFT here
+  row_fft = np.fft.fft(gray_img, axis=1)
 
+  row_col_fft = np.fft.fft(row_fft, axis=0)
 
-
+  return row_fft, row_col_fft
 
 if __name__ == '__main__':
   
